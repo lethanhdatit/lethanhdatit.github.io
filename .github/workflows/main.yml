@@ -16,8 +16,10 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 5.0.403
-     # publishes Blazor project to the release-folder
-    - name: Publish .NET Core Project
-      run: dotnet publish HubService/HubService.csproj -c Release -o release --nologo
-      
-      
+    - name: Install dependencies
+      run: dotnet restore "./HubService"
+    - name: Build code
+      run: dotnet build "./HubService" --configuration Release --no-restore
+    - name: Publish application
+      run: dotnet publish "./HubService" -c Release -o HubService    
+        
