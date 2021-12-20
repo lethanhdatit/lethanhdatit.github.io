@@ -8,7 +8,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -30,25 +29,18 @@ namespace HubService
         {
 
             services.AddControllers();
-            services.AddSingleton<IConfiguration>(Configuration);
-
-            var whiteListDomains = Configuration.GetSection("WhiteListDomain").Get<List<string>>();
-
-            if (whiteListDomains != null && whiteListDomains.Any())
-                services.AddCors(options =>
-                {
-                    options.AddPolicy("myAllowSpecificOrigins",
-                        builder =>
-                        {
-                            foreach (var domain in whiteListDomains)
-                                builder.WithOrigins(domain)
-                                       .AllowAnyHeader()
-                                       .AllowAnyMethod()
-                                       .SetIsOriginAllowed((x) => true)
-                                       .AllowCredentials();
-                        });
-                });
-
+            services.AddCors(options =>
+            {
+                options.AddPolicy("_myAllowSpecificOrigins",
+                    builder =>
+                    {
+                        builder.WithOrigins("https://localhost:44344/")
+                               .AllowAnyHeader()
+                               .AllowAnyMethod()
+                               .SetIsOriginAllowed((x) => true)
+                               .AllowCredentials();
+                    });
+            });
             services.AddSignalR();
             services.AddSwaggerGen(c =>
             {
@@ -69,7 +61,7 @@ namespace HubService
             app.UseHttpsRedirection();
 
             app.UseRouting();
-            app.UseCors("myAllowSpecificOrigins");
+            app.UseCors("_myAllowSpecificOrigins");
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
